@@ -37,7 +37,7 @@ router.get('/tasks', Auth, async (req, res) => {
     if(req.query.sortBy) {
         // ex- req.query.sortBy-> completed:desc
         const args = req.query.sortBy.split(':');       // ['completed', 'desc']
-        const sortOrder = args[1] === 'asc' ? 1 : -1;   // 1->asc and -1->desc
+        const sortOrder = args[1] === 'desc' ? -1 : 1;   // 1->asc(default) and -1->desc
 
         sort[args[0]] = sortOrder;      // sort = { completed : 1||-1 }
     }
@@ -64,7 +64,7 @@ router.get('/tasks/:id', Auth, async (req, res) => {
         const task = await Task.findOne({ _id: req.params.id, owner: req.user._id });
 
         if(!task) {
-            res.status(404).send();
+            return res.status(404).send();
         }
         res.status(200).send(task);
     } catch(e) {
@@ -84,9 +84,9 @@ router.patch('/tasks/:id', Auth, async (req, res) => {
     }
 
     try {
-        const task = await Task.findById({ _id: req.params.id, owner: req.user._id });
+        const task = await Task.findOne({ _id: req.params.id, owner: req.user._id });
         if(!task) {
-            res.status(400).send();
+            return res.status(404).send();
         }
 
         requestedUpdates.forEach(update => task[update] = req.body[update]);
@@ -94,17 +94,17 @@ router.patch('/tasks/:id', Auth, async (req, res) => {
         await task.save();
         res.send(task);
     } catch(e) {
-        res.status(400).send(e);
+        res.status(500).send(e);
     }
 });
 
 /**Delete single user */
 router.delete('/tasks/:id', Auth, async (req, res) => {
     try{
-        const task = await Task.findOneAndDelete({ _id: req.params.id ,owner: req.user._id });
+        const task = await Task.findOneAndDelete({ _id: req.params.id, owner: req.user._id });
 
         if(!task) {
-            res.status(404).send();
+            return res.status(404).send();
         }
 
         res.send(task);

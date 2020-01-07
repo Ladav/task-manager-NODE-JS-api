@@ -65,7 +65,7 @@ router.get('/users/me', Auth, async (req, res) => {
     res.send(req.user);
 });
 
-/**Update single user by id using-req's param object */
+/**Update user by id using-req's param object */
 router.patch('/users/me', Auth, async (req, res) => {
     const requestedUpdates = Object.keys(req.body);
     const allowedUpdates = ['name', 'email', 'password', 'age'];
